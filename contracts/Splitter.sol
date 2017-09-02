@@ -17,6 +17,10 @@ contract Splitter is MappingWithStruct {
 
     function Splitter() { owner = msg.sender; }
 
+    event LogFund(bytes32 id, address funder, uint amount);
+	event LogWithdrawal(address recipient, uint amount);
+	event LogAccidentalFund(address recipient, uint amount);
+
     function Withdraw(bytes32 id, bytes32 password) returns(bool) {
         // make sure it's actually been assigned a value
         if (!isEntity(id)) {revert();}
@@ -26,6 +30,7 @@ contract Splitter is MappingWithStruct {
         if (!(keccak256(password) == instance.passwordHash)) {revert();}
         msg.sender.transfer(instance.amount);
         // resolve as complete
+        LogWithdrawal(msg.sender, instance.amount);
         deleteEntity(id);
         return true;
     }
@@ -39,6 +44,7 @@ contract Splitter is MappingWithStruct {
             entityStructs[id].amount += msg.value;
         // Ensure's they've provided an id and passwordHash
         } else if (id.length > 0 && passwordHash.length > 0) {
+            LogFund(id, msg.sender, msg.value);
             newEntity(id, msg.value, passwordHash, msg.sender);
         } else {revert();}
         return true;
@@ -54,6 +60,7 @@ contract Splitter is MappingWithStruct {
         // whoops, I guess if someone accidentally
         // sends ETH to this contract I'll just
         // get to keep it ¯\_(ツ)_/¯
+        LogAccidentalFund(msg.sender, msg.value);
     }
 
 }

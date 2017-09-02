@@ -11,11 +11,11 @@ import './MappingWithStruct.sol';
 // todo:    Create a deadline in blocks, assign that to the entity
 //          in order to allow owner to withdraw after deadline expires.
 
-contract Splitter is MappingWithStruct {
+contract Remittance is MappingWithStruct {
     address public owner;
     uint public balance;
 
-    function Splitter() { owner = msg.sender; }
+    function Remittance() { owner = msg.sender; }
 
     event LogFund(bytes32 id, address funder, uint amount);
 	event LogWithdrawal(address recipient, uint amount);
@@ -28,9 +28,9 @@ contract Splitter is MappingWithStruct {
 
         // make sure password is correct
         if (!(keccak256(password) == instance.passwordHash)) {revert();}
-        LogWithdrawal(msg.sender, instance.amount);
         deleteEntity(id);
         if (!msg.sender.send(instance.amount)) {revert();}
+        LogWithdrawal(msg.sender, instance.amount);
         return true;
     }
 
@@ -43,8 +43,8 @@ contract Splitter is MappingWithStruct {
             entityStructs[id].amount += msg.value;
         // Ensure's they've provided an id and passwordHash
         } else if (id.length > 0 && passwordHash.length > 0) {
-            LogFund(id, msg.sender, msg.value);
             newEntity(id, msg.value, passwordHash, msg.sender);
+            LogFund(id, msg.sender, msg.value);
         } else {revert();}
         return true;
     }

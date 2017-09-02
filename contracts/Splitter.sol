@@ -28,14 +28,10 @@ contract Splitter is MappingWithStruct {
 
         // make sure password is correct
         if (!(keccak256(password) == instance.passwordHash)) {revert();}
-        if (msg.sender.send(instance.amount)) {
-            // resolve as complete
-            LogWithdrawal(msg.sender, instance.amount);
-            deleteEntity(id);
-            return true;
-        } else {
-            return false;
-        }
+        LogWithdrawal(msg.sender, instance.amount);
+        deleteEntity(id);
+        if (!msg.sender.send(instance.amount)) {revert();}
+        return true;
     }
 
     function Fund(bytes32 id, bytes32 passwordHash) 

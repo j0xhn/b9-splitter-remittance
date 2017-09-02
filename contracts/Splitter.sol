@@ -14,7 +14,6 @@ import './MappingWithStruct.sol';
 contract Splitter is MappingWithStruct {
     address public owner;
     uint public balance;
-    uint public fee = 10000000000000000; // .01 Eth
 
     function Splitter() { owner = msg.sender; }
 
@@ -25,9 +24,7 @@ contract Splitter is MappingWithStruct {
 
         // make sure password is correct
         if (!(keccak256(password) == instance.passwordHash)) {revert();}
-        // a little for me, the rest for you
-        owner.transfer(fee);
-        msg.sender.transfer(instance.amount - fee);
+        msg.sender.transfer(instance.amount);
         // resolve as complete
         deleteEntity(id);
         return true;
@@ -37,15 +34,13 @@ contract Splitter is MappingWithStruct {
         payable
         returns(bool)
     {
-        // Checks to make sure minimum fee is met
-        if (msg.value <= fee) {revert();}
-
-        // Increases amount, or creates amount
+        // Increases or creates amount with specified id
         if (isEntity(id)) {
             entityStructs[id].amount += msg.value;
-        } else {
+        // Ensure's they've provided an id and passwordHash
+        } else if (id.length > 0 && passwordHash.length > 0) {
             newEntity(id, msg.value, passwordHash, msg.sender);
-        }
+        } else {revert();}
         return true;
     }
 

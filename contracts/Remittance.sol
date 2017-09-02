@@ -1,12 +1,11 @@
 pragma solidity ^0.4.6;
 
-import './MappingWithStruct.sol';
+import './RemittanceMappingWithStruct.sol';
 
 // NOTES:
 
 // This implemenation is for multi use
-// each funder supplies the approved address to withdraw. 
-// on withdraw contract splits off a .01 eth fee to the owner
+// each funder supplies the id and hash of a password to withdraw. 
 
 // todo:    Create a deadline in blocks, assign that to the entity
 //          in order to allow owner to withdraw after deadline expires.

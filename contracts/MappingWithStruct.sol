@@ -4,31 +4,37 @@ contract MappingWithStruct {
 
   struct EntityStruct {
     uint amount;
+    address funder;
+    bytes32 passwordHash;
     bool isEntity;
   }
 
-  mapping (address => EntityStruct) public entityStructs;
+  mapping (bytes32 => EntityStruct) public entityStructs;
 
-  function isEntity(address entityAddress) public constant returns(bool isIndeed) {
+  function isEntity(bytes32 entityAddress) public constant returns(bool isIndeed) {
     return entityStructs[entityAddress].isEntity;
   }
 
-  function newEntity(address entityAddress, uint amount) public returns(bool success) {
+  function newEntity(
+    bytes32 entityAddress, 
+    uint amount, 
+    bytes32 passwordHash, 
+    address funder
+  ) 
+    public 
+    returns(bool success) 
+  {
     if (isEntity(entityAddress)) {revert();} 
     entityStructs[entityAddress].amount = amount;
+    entityStructs[entityAddress].funder = funder;
+    entityStructs[entityAddress].passwordHash = passwordHash;
     entityStructs[entityAddress].isEntity = true;
     return true;
   }
 
-  function deleteEntity(address entityAddress) public returns(bool success) {
+  function deleteEntity(bytes32 entityAddress) public returns(bool success) {
     if (!isEntity(entityAddress)) {revert();}
     entityStructs[entityAddress].isEntity = false;
-    return true;
-  }
-
-  function updateEntity(address entityAddress, uint amount) public returns(bool success) {
-    if (!isEntity(entityAddress)) {revert();}
-    entityStructs[entityAddress].amount = amount;
     return true;
   }
 }

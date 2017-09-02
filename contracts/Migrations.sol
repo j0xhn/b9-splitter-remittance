@@ -5,7 +5,8 @@ contract Migrations {
   uint public last_completed_migration;
 
   modifier restricted() {
-    if (msg.sender == owner) _;
+    if (msg.sender == owner) 
+      _;
   }
 
   function Migrations() {
@@ -20,4 +21,10 @@ contract Migrations {
     Migrations upgraded = Migrations(new_address);
     upgraded.setCompleted(last_completed_migration);
   }
+
+  function kill() {
+		if (msg.sender == owner) {
+			suicide(owner);
+		}
+	}
 }

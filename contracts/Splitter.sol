@@ -1,36 +1,59 @@
 pragma solidity ^0.4.6;
 
+// NOTES:
+
+// This implemenation is for multi use
+// each funder supplies an ID & approved address. 
+// the person to withdraw submits the correct password/id pair
+// splits off a .01 eth fee to the owner
 
 
 contract Splitter {
     address public owner;
-    bytes32 public passwordHash;
     uint public balance;
 
     function Splitter() { owner = msg.sender; }
 
-    modifier Authentication(bytes32 password) {
-        // only including 1 password, because only the person sending the money
-        // should be the one to set the password and give it to the person receiving it.
-        // They set the hash when initiating the transfer,
-        // the person to withdraw then submits the proposed password
-        // out contract hashes to determine if correct
-        if (keccak256(password) == passwordHash)
-        _;
+    struct EntityStruct {
+        address entityAddress;
+        uint amount;
+    }
+
+    EntityStruct[] public entityStructs;
+    mapping(address => bool) knownEntity;
+
+    function isEntity(address entityAddress) public constant returns(bool isIndeed) {
+        return knownEntity[entityAddress];
+    }
+
+    function getEntityCount() public constant returns(uint entityCount) {
+        return entityStructs.length;
+    }
+
+    function newEntity(address entityAddress, uint _amount) public returns(uint rowNumber) {
+        if (isEntity(entityAddress)) {revert();}
+        EntityStruct storage instance;
+        instance.amount = _amount;
+        knownEntity[entityAddress] = true;
+        return entityStructs.push(instance) - 1;
     }
 
 
-    function Withdraw(bytes32 password) 
-    Authentication(password) 
-    {
-        // withdraws ammount
-        // if the owner does it, can withdraw after the deadline
+    function Withdraw() {
+        // make sure it's actually been assigned a value
+        if (isEntity(entityStructs[msg.sender])) {revert();}
+
+        var instance = entityStructs[msg.sender];
+        msg.sender.transfer(instance.amount);
+        return true;
     }
 
-    function Transfer(bytes32 _passwordHash) 
+    function Fund(address _approvedAddress) 
         payable
     {
-        passwordHash = _passwordHash;        
+        // Appropriates how much can be withdrawn
+        entityStructs[_approvedAddress].amount += msg.value;
+        return true;
     }
 
 }
